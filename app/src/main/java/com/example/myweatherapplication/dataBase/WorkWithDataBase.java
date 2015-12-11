@@ -22,7 +22,7 @@ public class WorkWithDataBase {
 
     static SQLiteDatabase dBase;
     static Context cont;
-    ContentValues cv = new ContentValues();
+
 
     private int cityColIndex;
     private int dateAndTimeColIndex;
@@ -33,17 +33,17 @@ public class WorkWithDataBase {
     private int windSpeedColIndex;
     private int icoColIndex;
 
-    static int SIZE_OF_LIST;
+    static int SIZE_OF_LIST = 21;
 
     public WorkWithDataBase(JSONObject jObject, Context context) {
+        ContentValues cv = new ContentValues();
         cont = context;
         ParseJSON pJson = new ParseJSON(jObject);
         DataBase dataBase = new DataBase(cont);
         dBase = dataBase.getWritableDatabase();
         Cursor c = dBase.query(TABLE_NAME, null, null, null, null, null, null);
-        showDB(c);
-        SIZE_OF_LIST = c.getCount();
-        if (!pJson.isNull()) {
+        if (pJson.isNull() == false) {
+
             if (c.getCount() == 0) {
                 for (int i = 0; i < SIZE_OF_LIST; i++) {
                     pJson.setCountInArray(i);
@@ -73,6 +73,7 @@ public class WorkWithDataBase {
                 }
 
             }
+
         }
         cityColIndex = c.getColumnIndex(DataBase.CITY);
         dateAndTimeColIndex = c.getColumnIndex(DataBase.DATE_AND_TIME);
@@ -82,7 +83,7 @@ public class WorkWithDataBase {
         pressureColIndex = c.getColumnIndex(DataBase.PRESSURE);
         windSpeedColIndex = c.getColumnIndex(DataBase.WIND_SPEED);
         icoColIndex = c.getColumnIndex(DataBase.ICON);
-        showDB(c);
+
         c.close();
         dBase.close();
     }
@@ -134,21 +135,23 @@ public class WorkWithDataBase {
 
     public String[] getDates() {
 
-        String[] dates = new String[SIZE_OF_LIST - 1];
+        String[] dates = new String[SIZE_OF_LIST - 1 ];
         DataBase dataBase = new DataBase(cont);
         dBase = dataBase.getWritableDatabase();
         String query = "SELECT " + DataBase.DATE_AND_TIME + " FROM " + TABLE_NAME;
         Cursor c = dBase.rawQuery(query, null);
         showDB(c);
-        c.moveToFirst();
-        c.moveToNext();
-        int i = 0;
-        while (i < dates.length) {
-            dates[i] = c.getString(c.getColumnIndex(DataBase.DATE_AND_TIME));
-            i++;
+        if (c.moveToFirst()) {
             c.moveToNext();
-        }
+            int i = 0;
+            while (i < dates.length) {
+                dates[i] = c.getString(c.getColumnIndex(DataBase.DATE_AND_TIME));
+                i++;
+                c.moveToNext();
+            }
 
+
+        }
         c.close();
         dBase.close();
         return dates;

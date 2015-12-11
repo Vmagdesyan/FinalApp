@@ -104,7 +104,7 @@ public class ParseJSON {
             e.printStackTrace();
         }
         try{
-            description = jDescription.getString("main");
+            description = jDescription.getString("description");
         }
         catch (JSONException e){
             e.printStackTrace();
@@ -187,11 +187,14 @@ public class ParseJSON {
     }
     public int getSizeOfList() {
         int cnt = 0;
-        try {
-            cnt = jsonObject.getInt("cnt");
-        } catch (JSONException e) {
-            e.printStackTrace();
+        if (jsonObject != null) {
+            try {
+                cnt = jsonObject.getInt("cnt");
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
         return cnt;
     }
+
 }

@@ -6,8 +6,11 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.app.Fragment;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,24 +29,28 @@ import org.json.JSONObject;
  */
 public class ChangeCity extends DialogFragment implements OnClickListener{
     private EditText inputText;
+    Context mainActivity;
     SharedPreferences mSettings;
     public static final String APP_PREFERENCES = "mysettings";
     public static final String APP_PREFERENCES_CITY = "City";
     private MainFragment mainFragment;
 
+    public ChangeCity(Context context){
+        mainActivity = context;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        getDialog().setTitle("Город");
+        getDialog().setTitle("Введите город");
+        getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.splash_background)));
         View v = inflater.inflate(R.layout.fragment_change_city, null);
         v.findViewById(R.id.btnInput).setOnClickListener(this);
         v.findViewById(R.id.btnCancel).setOnClickListener(this);
         v.findViewById(R.id.inputTextField).setOnClickListener(this);
         inputText = (EditText)v.findViewById(R.id.inputTextField);
-
         return v;
+
     }
 
 
@@ -56,15 +63,18 @@ public class ChangeCity extends DialogFragment implements OnClickListener{
             {
                 mSettings = getActivity().getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = mSettings.edit();
-                String inputTextField = "";
-                /*if(inputText.getText().toString() == "")
-                    editor.putString(APP_PREFERENCES_CITY, "Rostov-on-Don");
-                else*/
+                String s = inputText.getText().toString();
+                if(!s.isEmpty())
                     editor.putString(APP_PREFERENCES_CITY, inputText.getText().toString());
+
+                else
+                    editor.putString(APP_PREFERENCES_CITY, "Ростов-на-Дону");
                 editor.commit();
                 dismiss();
                 mainFragment = new MainFragment();
                 setCurrentFragment(mainFragment, false);
+                mainFragment.removeOnItemClickListener();
+                mainFragment.setOnItemClickListener((MainFragment.OnItemPressed) mainActivity);
             }
 
     }

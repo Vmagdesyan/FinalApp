@@ -2,7 +2,6 @@ package com.example.myweatherapplication.launch;
 
 import android.app.DialogFragment;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -20,9 +19,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.myweatherapplication.ItemFromAdapter;
 import com.example.myweatherapplication.R;
 import com.example.myweatherapplication.dataBase.WorkWithDataBase;
+import com.example.myweatherapplication.dialogs.About;
 import com.example.myweatherapplication.dialogs.ChangeCity;
 
 import org.json.JSONObject;
@@ -31,6 +30,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
     private MainFragment mainFragment;
     private int close = 0;
     private boolean isWeatherForecastFragmentActive;
+    private boolean exitNow = false;
     private DialogFragment dg1;
     private ActionBarDrawerToggle mDrawerToggle;
     private String[] toolbarTitles;
@@ -77,12 +77,8 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
                 invalidateOptionsMenu();
             }
         };
-        drawerLayout.setDrawerListener(mDrawerToggle);
-
-        if (savedInstanceState == null) {
-            selectItem(0);
-        }
     }
+
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -112,39 +108,28 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
         if (!isWeatherForecastFragmentActive) {
             setWeatherForecastFragment();
         } else {
-            if (close != 0) {
+            if (exitNow) {
                 super.onBackPressed();
             } else {
                 Toast toast = Toast.makeText(getApplicationContext(), "Приложение закроется", Toast.LENGTH_SHORT);
                 toast.show();
-                close++;
+                exitNow = true;
             }
         }
     }
 
     private void setWeatherForecastFragment() {
+        mainFragment.removeOnItemClickListener();
+        mainFragment = new MainFragment();
+        mainFragment.setOnItemClickListener(this);
         setCurrentFragment(mainFragment, true);
         isWeatherForecastFragmentActive = true;
     }
 
     private void setFragment(Fragment fragment) {
         setCurrentFragment(fragment, true);
-        isWeatherForecastFragmentActive = false;
+        isWeatherForecastFragmentActive = true;
     }
-
-
-    /*@Override
-    public void onBackPressed() {
-        if (close == 0)
-        {
-            Toast toast = Toast.makeText(getApplicationContext(), "Приложение закроется", Toast.LENGTH_SHORT);
-            toast.show();
-            close++;
-        } else {
-            super.onBackPressed();
-            close--;
-        }
-    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
@@ -157,28 +142,34 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
       int id = item.getItemId();
         switch (id){
             case R.id.change_city:
-                dg1 = new ChangeCity();
+                dg1 = new ChangeCity(MainActivity.this);
                 dg1.show(getFragmentManager(), "dg1");
 
                 break;
+            case R.id.update:
+                setWeatherForecastFragment();
+                break;
             case R.id.about_app:
+                About aboutDialog = new About(MainActivity.this);
+                aboutDialog.setTitle("О нас");
+                aboutDialog.show();
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
-    public void itemPressed(int position, JSONObject jSon) {
-        workWithDataBase = new WorkWithDataBase(jSon, getApplicationContext() );
-        Bundle bundle = new Bundle();
-        itemFromAdapter = new ItemFromAdapter();
-        setCurrentFragment(itemFromAdapter, true);
-        bundle.putDouble("pressure", workWithDataBase.getPressureForPeriod(position));
-        bundle.putDouble("windSpeed", workWithDataBase.getWindSpeed(position));
-        bundle.putDouble("temp", workWithDataBase.getTemp(position));
-        bundle.putString("ico", workWithDataBase.getIconForItem(position));
-        itemFromAdapter.setArguments(bundle);
-        close++;
+    public void itemPressed(int position, WorkWithDataBase workWithDataBase) {
+            Bundle bundle = new Bundle();
+            itemFromAdapter = new ItemFromAdapter();
+            setCurrentFragment(itemFromAdapter, false);
+
+            bundle.putDouble("pressure", workWithDataBase.getPressureForPeriod(position));
+            bundle.putDouble("windSpeed", workWithDataBase.getWindSpeed(position));
+            bundle.putDouble("temp", workWithDataBase.getTemp(position));
+            bundle.putString("ico", workWithDataBase.getIconForItem(position));
+            itemFromAdapter.setArguments(bundle);
+            isWeatherForecastFragmentActive = false;
     }
 
     @Override
@@ -203,25 +194,17 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
     private void selectItem(int position) {
         switch(position){
             case 0:
-                break;
-            case 1:
+                dg1 = new ChangeCity(MainActivity.this);
                 dg1.show(getFragmentManager(), "dg1");
+                close++;
+                break;
+
+            case 1:
+                About aboutDialog = new About(MainActivity.this);
+                aboutDialog.setTitle("О нас");
+                aboutDialog.show();
                 break;
         }
-
-        // update the main content by replacing fragments
-        /*Fragment fragment = new PlanetFragment();
-        Bundle args = new Bundle();
-        args.putInt(PlanetFragment.ARG_PLANET_NUMBER, position);
-        fragment.setArguments(args);
-
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content_frame, fragment).commit();
-
-        // update selected item and title, then close the drawer
-        mDrawerList.setItemChecked(position, true);
-        setTitle(mPlanetTitles[position]);
-        mDrawerLayout.closeDrawer(mDrawerList);*/
     }
 
     @Override

@@ -5,34 +5,38 @@
     android:background="@color/splash_background">
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:id="@+id/city"
-        android:text="@string/city"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/imageOfWeather"
-        android:layout_toEndOf="@+id/imageOfWeather" />
+        android:layout_toEndOf="@+id/imageOfWeather"
+        android:autoText="false"
+        android:textAlignment="center" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/temp"
+        android:text=""
+        android:paddingLeft="33dp"
         android:id="@+id/temp"
-        android:layout_marginTop="5dp"
+        android:textAlignment="center"
+        android:textSize="@dimen/myTextSize"
         android:layout_below="@+id/city"
         android:layout_toRightOf="@+id/imageOfWeather"
-        android:layout_toEndOf="@+id/imageOfWeather" />
+        android:layout_toEndOf="@+id/imageOfWeather"
+        android:gravity="center|center_vertical|center_horizontal" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="@string/weather"
         android:id="@+id/weather"
-        android:layout_marginTop="5dp"
-        android:layout_below="@+id/temp"
+        android:textAlignment="center"
+        android:gravity="center|center_vertical"
+        android:layout_alignBottom="@+id/imageOfWeather"
         android:layout_toRightOf="@+id/imageOfWeather"
         android:layout_toEndOf="@+id/imageOfWeather" />
 
@@ -48,6 +52,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/listWeather"
+        android:paddingTop="10dp"
         android:layout_below="@+id/imageOfWeather"
         android:layout_centerHorizontal="true" />
 

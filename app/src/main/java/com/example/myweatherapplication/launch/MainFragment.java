@@ -2,7 +2,6 @@ package com.example.myweatherapplication.launch;
 
 
 import android.app.Fragment;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -17,7 +16,6 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.example.myweatherapplication.ItemFromAdapter;
 import com.example.myweatherapplication.R;
 import com.example.myweatherapplication.dataBase.WorkWithDataBase;
 import com.example.myweatherapplication.utils.API;
@@ -33,7 +31,7 @@ import java.util.Map;
  * A simple {@link Fragment} subclass.
  */
 public class MainFragment extends Fragment {
-    private MyAsyncTask myATask = new MyAsyncTask();
+
     private TextView cityV;
     private TextView tempV;
     private TextView weatherV;
@@ -51,9 +49,9 @@ public class MainFragment extends Fragment {
     final static String TEMP = "temp";
     public static final String APP_PREFERENCES = "mysettings";
     public static final String APP_PREFERENCES_CITY = "City";
-    public String city = "Rostov-on-Don";
+    public String city = "Ростов-на-Дону";
     public interface OnItemPressed {
-        void itemPressed(int position, JSONObject jSon);
+        void itemPressed(int position, WorkWithDataBase dBase);
     }
     public OnItemPressed listener;
 
@@ -67,6 +65,7 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        MyAsyncTask myATask = new MyAsyncTask();
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         cityV = (TextView) rootView.findViewById(R.id.city);
         tempV = (TextView) rootView.findViewById(R.id.temp);
@@ -74,9 +73,9 @@ public class MainFragment extends Fragment {
         imageOfWeather = (ImageView) rootView.findViewById(R.id.imageOfWeather);
         listWeather = (ListView) rootView.findViewById(R.id.listWeather);
         mSettings = getActivity().getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
-            city = mSettings.getString(APP_PREFERENCES_CITY,
-                    "Rostov-on-Don");
-        myATask.execute(city);
+        city = mSettings.getString(APP_PREFERENCES_CITY, "Ростов-на-Дону");
+        if (!city.isEmpty())
+            myATask.execute(city);
 
         return rootView;
     }
@@ -94,19 +93,15 @@ public class MainFragment extends Fragment {
         @Override
         protected void onPostExecute(final JSONObject result) {
             super.onPostExecute(result);
-            WorkWithDataBase workWithDataBase = new WorkWithDataBase(result, getActivity() );
+            final WorkWithDataBase workWithDataBase = new WorkWithDataBase(result, getActivity() );
             String[] datesAndTime = workWithDataBase.getDates();
             String[] tempForPeriod;
             int[] ico = workWithDataBase.getIcons();
             tempForPeriod = workWithDataBase.getTempForDates();
-            cityV.setText(cityV.getText() + "\n" + workWithDataBase.getStringValues(CITY_COL_INDEX));
-            tempV.setText(tempV.getText() + " " + Math.round(workWithDataBase.getDoubleValues(TEMP_COL_INDEX)));
-            weatherV.setText(weatherV.getText() + " " + workWithDataBase.getStringValues(WEATHER_COL_INDEX));
-
-            Glide.with(getActivity())
-                    .load("http://openweathermap.org/img/w/" + workWithDataBase.getStringValues(ICO_COL_INDEX)
-                            + ".png")
-                    .into(imageOfWeather);
+            cityV.setText(workWithDataBase.getStringValues(CITY_COL_INDEX));
+            tempV.setText(Math.round(workWithDataBase.getDoubleValues(TEMP_COL_INDEX)) + "°");
+            weatherV.setText(workWithDataBase.getStringValues(WEATHER_COL_INDEX));
+            imageOfWeather.setImageResource(getIcon(workWithDataBase.getStringValues(ICO_COL_INDEX)));
 
             final ArrayList<Map<String, Object>> data = new ArrayList<Map<String, Object>>(datesAndTime.length);
             Map<String, Object> m;
@@ -114,7 +109,7 @@ public class MainFragment extends Fragment {
                 m = new HashMap<>();
                 m.put(DATES_TIME, datesAndTime[i]);
                 m.put(ICON, ico[i]);
-                m.put(TEMP, tempForPeriod[i]);
+                m.put(TEMP, tempForPeriod[i] + "°");
                 data.add(m);
             }
 
@@ -125,10 +120,48 @@ public class MainFragment extends Fragment {
             listWeather.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        listener.itemPressed(position, result);
+                        listener.itemPressed(position, workWithDataBase);
                 }
             });
             listWeather.setAdapter(simpleAdapter);
         }
     }
+    private int getIcon(String icon) {
+        if (icon.equals("01d"))
+            return R.drawable._01d;
+        else if (icon.equals("01n"))
+            return R.drawable._01n;
+        else if (icon.equals("02d"))
+            return R.drawable._02d;
+        else if (icon.equals("02n"))
+            return R.drawable._02n;
+        else if (icon.equals("03d"))
+            return R.drawable._03d;
+        else if (icon.equals("03n"))
+            return R.drawable._03n;
+        else if (icon.equals("04d"))
+            return R.drawable._04d;
+        else if (icon.equals("04n"))
+            return R.drawable._04n;
+        else if (icon.equals("09d"))
+            return R.drawable._09d;
+        else if (icon.equals("09n"))
+            return R.drawable._09n;
+        else if (icon.equals("10d"))
+            return R.drawable._10d;
+        else if (icon.equals("10n"))
+            return R.drawable._10n;
+        else if (icon.equals("11d"))
+            return R.drawable._11d;
+        else if (icon.equals("11n"))
+            return R.drawable._11n;
+        else if (icon.equals("13d"))
+            return R.drawable._13d;
+        else if (icon.equals("13n"))
+            return R.drawable._13n;
+        else if (icon.equals("50d"))
+            return R.drawable._50d;
+        else return R.drawable._50n;
+    }
+
 }
